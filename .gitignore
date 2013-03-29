@@ -1,3 +1,7 @@
+# local configs
+ftp_address.json
+credentials.json
+
 *.py[cod]
 
 # C extensions
