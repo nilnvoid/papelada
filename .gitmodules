@@ -1,0 +1,3 @@
+[submodule "question2answer"]
+	path = question2answer
+	url = git@github.com:fabiosantoscode/question2answer.git
