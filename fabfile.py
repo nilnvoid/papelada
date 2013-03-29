@@ -20,10 +20,22 @@ def _get_confs():
             usrpass = json.load(fp)
             env.username, env.password = usrpass['username'], usrpass['password']
     except IOError:
-        print('You should use save_ftp_address and save_credentials to save your FTP address and credentials on this machine')
+        print('You should use save_ftp_address and save_credentials'
+              ' to save your FTP address and credentials on this '
+              'machine')
 
 @task
 def put(subdomain='www'):
-    _get_confs()
-    local('curl ftp://%(address)s --user %(username)s:%(password)s' % env)
+    '''put all files in question2answer folder to the desired
+    subdomain. Requires the external script ftpsync.py to be
+    executable (use chmod +)
 
+    '''
+
+    _get_confs()
+    env.update({'subdomain': subdomain})
+    remote_url = ('ftp://%(username)s:%(password)s'
+        '@'
+        '%(address)s/www/%(subdomain)s' % env)
+
+    local('./ftpsync.py %s question2answer/ --upload' % remote_url)
