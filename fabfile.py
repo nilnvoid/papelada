@@ -25,7 +25,7 @@ def _get_confs():
               'machine')
 
 @task
-def put(subdomain='www'):
+def put(subdomain):
     '''put all files in question2answer folder to the desired
     subdomain. Requires the external script ftpsync.py to be
     executable (use chmod +)
