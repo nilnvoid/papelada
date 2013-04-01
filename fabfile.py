@@ -7,22 +7,33 @@ def save_credentials(user, pwd):
     with open('credentials.json', 'wb') as fp:
         json.dump({'username': user, 'password': pwd}, fp, indent=4)
 
+
 @task
 def save_ftp_address(ftp_address):
     with open('ftp_address.json', 'wb') as fp:
-        json.dump({'ftpAddress': ftp_address}, fp, indent=4)
+        json.dump({'address': ftp_address}, fp, indent=4)
+
 
 def _get_confs():
-    try: 
-        with open('ftp_address.json', 'r') as fp:
-            env.address = json.load(fp)['ftpAddress']
-        with open('credentials.json', 'r') as fp:
-            usrpass = json.load(fp)
-            env.username, env.password = usrpass['username'], usrpass['password']
+    try:
+        with open('ftp_address.json', 'r') as ftpconf:
+            env.update(json.load(ftpconf))
+        with open('credentials.json', 'r') as credfile:
+            env.update(json.load(credfile))
     except IOError:
         print('You should use save_ftp_address and save_credentials'
               ' to save your FTP address and credentials on this '
               'machine')
+
+def _get_base_url(subdomain=None):
+    ret = ('ftp://%(username)s:%(password)s'
+        '@'
+        '%(address)s/www/' % env)
+    if subdomain:
+        return ret + subdomain
+    else:
+        return ret
+
 
 @task
 def put(subdomain):
@@ -33,9 +44,15 @@ def put(subdomain):
     '''
 
     _get_confs()
-    env.update({'subdomain': subdomain})
-    remote_url = ('ftp://%(username)s:%(password)s'
-        '@'
-        '%(address)s/www/%(subdomain)s' % env)
+    local('./ftpsync.py %s question2answer/ --upload' % _get_base_url(subdomain))
 
-    local('./ftpsync.py %s question2answer/ --upload' % remote_url)
+@task
+def get(subdomain):
+    '''get files from server. use cautiously
+
+    '''
+
+    _get_confs()
+    local('./ftpsync.py %s question2answer/ --download' % _get_base_url(subdomain))
+
+
