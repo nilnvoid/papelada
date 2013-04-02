@@ -1,6 +1,7 @@
 # local configs
 ftp_address.json
 credentials.json
+mysql_credentials.json
 
 *.py[cod]
 

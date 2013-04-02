@@ -7,6 +7,15 @@ def save_credentials(user, pwd):
     with open('credentials.json', 'wb') as fp:
         json.dump({'username': user, 'password': pwd}, fp, indent=4)
 
+@task
+def save_mysql_credentials():
+    with open('mysql_credentials.json', 'wb') as fp:
+        json.dump({
+            'hostname': raw_input('hostname (127.0.0.1): ') or '127.0.0.1',
+            'database': raw_input('database: '),
+            'username': raw_input('username: '),
+            'password': raw_input('password: '),
+        }, fp, indent=4)
 
 @task
 def save_ftp_address(ftp_address):
@@ -55,4 +64,17 @@ def get(subdomain):
     _get_confs()
     local('./ftpsync.py %s question2answer/ --download' % _get_base_url(subdomain))
 
+@task
+def configure():
+    '''Create a qa-config file with the correct db configuration
+    '''
+    with open('mysql_credentials.json') as fp:
+        env.update(json.load(fp))
+
+    dest = './question2answer/qa-config.php'
+    src = './qa-config.template.php'
+
+    with open(src, 'rb') as template_fp:
+        with open(dest, 'wb') as dest_fp:
+            dest_fp.write(template_fp.read().format(**env))
 
